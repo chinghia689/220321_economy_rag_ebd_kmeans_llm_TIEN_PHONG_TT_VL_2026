@@ -140,7 +140,7 @@ def main():
     """
     # Cấu hình mặc định
     VECTOR_STORE_PATH = "./chroma_economy_db"  # Thay đổi theo đường dẫn thực tế
-    LLM_PROVIDER = "groq"  # options: gemini, groq (groq miễn phí, rate limit cao)
+    LLM_PROVIDER = "openai"  # options: gemini, groq (groq miễn phí, rate limit cao)
 
     # Kiểm tra xem vector store có tồn tại không
     if not os.path.exists(VECTOR_STORE_PATH):

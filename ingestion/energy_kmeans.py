@@ -1,7 +1,9 @@
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning) # Ẩn cảnh báo của K-Means
 from sklearn.metrics.pairwise import cosine_similarity
-
 from ingestion.energy_base_distance import energy_base_distance
 
 
@@ -9,7 +11,7 @@ class EnergyRetriever:
     """
     Module Truy xuất thông tin nâng cao sử dụng Energy-Based Distance và K-Means.
     """
-    def __init__(self, vector_store, embeddings_model, k_retrieve=40, k_clusters=7, similarity_threshold=0.50, n_top_clusters=2, max_final_docs=15):
+    def __init__(self, vector_store, embeddings_model, k_retrieve=40, similarity_threshold=0.50, n_top_clusters=1, max_final_docs=15):
         """
         Khởi tạo Energy Retriever.
         
@@ -17,15 +19,13 @@ class EnergyRetriever:
             vector_store: Chroma vector store
             embeddings_model: Model embedding (HuggingFace embeddings)
             k_retrieve: Số top documents để retrieve (mặc định 40)
-            k_clusters: Số clusters cho K-Means (mặc định 7)
-            similarity_threshold: Ngưỡng cosine similarity (mặc định 0.40)
-            n_top_clusters: Số clusters tốt nhất để lấy docs (mặc định 3)
+            similarity_threshold: Ngưỡng cosine similarity (mặc định 0.50)
+            n_top_clusters: Số clusters tốt nhất để lấy docs (mặc định 1)
             max_final_docs: Số documents tối đa trả về cuối cùng (mặc định 15)
         """
         # retriever chuẩn dùng Cosine (Lấy diện rộng)
         self.retriever = vector_store.as_retriever(search_kwargs={'k': k_retrieve})
         self.embeddings = embeddings_model
-        self.k_clusters = k_clusters
         self.similarity_threshold = similarity_threshold
         self.n_top_clusters = n_top_clusters
         self.max_final_docs = max_final_docs
@@ -80,9 +80,40 @@ class EnergyRetriever:
             return final_docs
 
         # 6. Gom cụm K-Means trên docs đã lọc
-        actual_k = min(self.k_clusters, len(filtered_vectors))
-        kmeans = KMeans(n_clusters=actual_k, random_state=42, n_init='auto')
-        labels = kmeans.fit_predict(filtered_vectors)
+        n_samples = len(filtered_vectors)
+        
+        # Đặt giới hạn K chạy thử: Ít nhất là 2, nhiều nhất là 10 (hoặc nhỏ hơn nếu số lượng docs ít)
+        max_possible_k = min(10, n_samples - 1)
+        
+        best_k = 2  # Khởi tạo mặc định
+        best_labels = None
+        
+        if n_samples > 2: # Chỉ gom cụm khi có từ 3 docs trở lên
+            best_score = -1.0
+            
+            for k in range(2, max_possible_k + 1):
+                kmeans_temp = KMeans(n_clusters=k, random_state=42, n_init='auto')
+                labels_temp = kmeans_temp.fit_predict(filtered_vectors)
+                
+                # Tính điểm Silhouette cho cách chia K này
+                score = silhouette_score(filtered_vectors, labels_temp)
+                
+                if score > best_score:
+                    best_score = score
+                    best_k = k
+                    best_labels = labels_temp
+            
+            print(f"   -> 🤖 Tự động chọn K tối ưu = {best_k} (Silhouette Score cao nhất: {best_score:.4f})")
+            labels = best_labels
+            actual_k = best_k
+            
+        else:
+            # Nếu chỉ có 2 docs, ép thành 1 cụm hoặc chia làm 2 tùy bạn (ở đây chia 1 cho an toàn)
+            best_k = 1
+            labels = np.zeros(n_samples, dtype=int)
+            actual_k = best_k
+            print(f"   -> ⚠️ Số lượng docs quá ít ({n_samples}), tự động gom thành 1 cụm.")
+
 
         # 7. Tính Energy Distance cho từng cụm và xếp hạng
         cluster_energies = []

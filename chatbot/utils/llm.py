@@ -1,4 +1,4 @@
-# from langchain_openai import ChatOpenAI  # noqa: I001
+from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 import os  # noqa: E401, F401
@@ -24,23 +24,23 @@ class LLM:
         self.max_tokens = max_tokens
         self.model = ""
 
-    # def open_ai(self):
-    #     """
-    #     Khởi tạo LLM từ OpenAI (qua API key).
+    def open_ai(self):
+        """
+        Khởi tạo LLM từ OpenAI (qua API key).
 
-    #     Yêu cầu biến môi trường:
-    #         - KEY_API_OPENAI
-    #         - OPENAI_LLM_MODEL_NAME
+        Yêu cầu biến môi trường:
+            - KEY_API_OPENAI
+            - OPENAI_LLM_MODEL_NAME
 
-    #     Returns:
-    #         ChatOpenAI: đối tượng LLM của OpenAI.
-    #     """
-    #     llm = ChatOpenAI(
-    #         openai_api_key=os.environ["KEY_API_OPENAI"],
-    #         model=os.environ["OPENAI_LLM_MODEL_NAME"],
-    #         temperature=self.temperature,
-    #     )
-    #     return llm
+        Returns:
+            ChatOpenAI: đối tượng LLM của OpenAI.
+        """
+        llm = ChatOpenAI(
+            openai_api_key=os.environ["KEY_API_OPENAI"],
+            model=os.environ["OPENAI_LLM_MODEL_NAME"],
+            temperature=self.temperature,
+        )
+        return llm
 
     # def local_ai(self):
     #     """
@@ -80,22 +80,22 @@ class LLM:
     #     )
     #     return llm
 
-    def groq(self):
-        """
-        Khởi tạo LLM từ Groq API (miễn phí, rate limit cao).
+    # def groq(self):
+    #     """
+    #     Khởi tạo LLM từ Groq API (miễn phí, rate limit cao).
 
-        Yêu cầu biến môi trường:
-            - GROQ_API_KEY
+    #     Yêu cầu biến môi trường:
+    #         - GROQ_API_KEY
 
-        Returns:
-            ChatGroq: đối tượng LLM Groq.
-        """
-        llm = ChatGroq(
-            api_key=os.environ["GROQ_API_KEY"],
-            model="llama-3.1-8b-instant",
-            temperature=self.temperature,
-        )
-        return llm
+    #     Returns:
+    #         ChatGroq: đối tượng LLM Groq.
+    #     """
+    #     llm = ChatGroq(
+    #         api_key=os.environ["GROQ_API_KEY"],
+    #         model="llama-3.1-8b-instant",
+    #         temperature=self.temperature,
+    #     )
+    #     return llm
 
     # def grok(self):
     #     """
@@ -123,14 +123,14 @@ class LLM:
         Returns:
             Any: Đối tượng LLM tương ứng (OpenAI/Gemini/Local).
         """
-        # if llm_name == "openai":
-        #     return self.open_ai()
+        if llm_name == "openai":
+            return self.open_ai()
 
         # if llm_name == "gemini":
         #     return self.gemini()
 
-        if llm_name == "groq":
-            return self.groq()
+        # if llm_name == "groq":
+        #     return self.groq()
 
         # if llm_name == "local":
         #     return self.local_ai()

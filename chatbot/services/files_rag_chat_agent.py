@@ -64,9 +64,8 @@ class FilesChatAgent:
             vector_store=self.vector_store,
             embeddings_model=self.embeddings,
             k_retrieve=40,
-            k_clusters=7,
             similarity_threshold=0.50,
-            n_top_clusters=2,
+            n_top_clusters=1,
             max_final_docs=15
         )
 
@@ -85,6 +84,7 @@ class FilesChatAgent:
     def grade_documents(self, state: GraphState) -> Dict[str, Any]:
         """
         Đánh giá mức độ liên quan của các tài liệu với câu hỏi.
+        (Đã tối ưu: Sử dụng Batching gộp N tài liệu vào 1 prompt).
 
         Args:
             state (GraphState): Trạng thái chứa documents và question.
@@ -95,21 +95,18 @@ class FilesChatAgent:
         question = state["question"]
         documents = state["documents"]
 
-        filtered_docs = []
-        for doc in documents:
-            score = self.document_grader.get_chain().invoke(
-                {"question": question, "document": doc.page_content}
-            )
-            # Lấy điểm từ output (StrOutputParser trả về string thuần)
-            grade = score.lower().strip()
-            if grade == "yes":
-                filtered_docs.append(doc)
-                print(f"✅ Tài liệu liên quan: {doc.metadata.get('source', 'N/A')}")
-            else:
-                print(f"❌ Tài liệu không liên quan: {doc.metadata.get('source', 'N/A')}")
+        print(f"\n📝 Đang chấm điểm hàng loạt {len(documents)} tài liệu...")
+
+        # Gọi hàm grade_batch (chỉ tốn 1 API call duy nhất)
+        filtered_docs = self.document_grader.grade_batch(
+            question=question, 
+            retrieved_docs=documents
+        )
+
+        print(f"✅ Đã giữ lại {len(filtered_docs)}/{len(documents)} tài liệu liên quan.")
 
         return {"documents": filtered_docs, "question": question}
-
+        
     def decide_to_generate(self, state: GraphState) -> str:
         """
         Quyết định có sinh câu trả lời hay không dựa trên số lượng tài liệu lọc.

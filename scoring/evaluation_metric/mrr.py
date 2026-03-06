@@ -67,11 +67,11 @@ def mrr_excel(file_path, out: str = None):
     # === Đọc dữ liệu từ Excel ===
     df = pd.read_excel(file_path)
 
-    # === Parse contexts_answer từ string → list ===
-    df["contexts_answer"] = df["contexts_answer"].apply(safe_eval)
+    # === Parse contexts_ground_truth từ string → list ===
+    df["contexts_ground_truth"] = df["contexts_ground_truth"].apply(safe_eval)
 
     # === Tính Reciprocal Rank cho từng dòng ===
-    df["Mean Reciprocal Rank"] = df.apply(lambda row: reciprocal_rank(str(row["ground_truth"]), row["contexts_answer"]), axis=1)
+    df["Mean Reciprocal Rank"] = df.apply(lambda row: reciprocal_rank(str(row["ground_truth"]), row["contexts_ground_truth"]), axis=1)
 
     # === Tính MRR toàn cục ===
     mrr_value = df["Mean Reciprocal Rank"].mean()

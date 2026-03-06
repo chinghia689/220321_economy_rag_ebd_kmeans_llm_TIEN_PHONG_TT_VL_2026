@@ -17,7 +17,7 @@ class AnswerGeneratorDocs:
         prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", CustomPrompt.GENERATE_ANSWER_PROMPT),
-                ("system", "{prompt}"),
+                # ("system", "{prompt}"),
                 ("human", """Ngữ cảnh (CHỈ sử dụng thông tin trong đây):
 ---
 {context}

@@ -68,11 +68,11 @@ def hit_rate_excel(file_path, out: str = None, k: int = 5):
     # === Đọc dữ liệu từ Excel ===
     df = pd.read_excel(file_path)
 
-    # === Chuyển cột contexts_answer từ string → list ===
-    df["contexts_answer"] = df["contexts_answer"].apply(safe_eval)
+    # === Chuyển cột contexts_ground_truth từ string → list ===
+    df["contexts_ground_truth"] = df["contexts_ground_truth"].apply(safe_eval)
 
     # === Tính Hit@k cho từng dòng ===
-    df[f"Hit@{k}"] = df.apply(lambda row: hit_rate(str(row["ground_truth"]), row["contexts_answer"], k), axis=1)
+    df[f"Hit@{k}"] = df.apply(lambda row: hit_rate(str(row["ground_truth"]), row["contexts_ground_truth"], k), axis=1)
 
     # === Tính Hit Rate trung bình toàn cục ===
     hit_value = df[f"Hit@{k}"].mean()

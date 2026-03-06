@@ -13,6 +13,7 @@ from scoring.evaluation_metric.cosine_similarity import cosine_excel
 from scoring.evaluation_metric.mrr import mrr_excel
 from scoring.evaluation_metric.hit_rate import hit_rate_excel
 from scoring.evaluation_metric.ndcg import ndcg_excel
+# from scoring.evaluation_metric.ragas import score_excel_with_ragas_to_xlsx
 
 
 def evaluate_results(file_path, embeddings):
@@ -27,7 +28,14 @@ def evaluate_results(file_path, embeddings):
     Returns:
         str: Đường dẫn file kết quả cuối cùng.
     """
- 
+
+    # # RAGAS (faithfulness, answer_relevancy, context_precision, context_recall, answer_correctness)
+    # try:
+    #     ragas_output = os.path.join(os.path.dirname(file_path), "ragas_scores.xlsx")
+    #     ragas_result = score_excel_with_ragas_to_xlsx(file_path, output_xlsx=ragas_output)
+    #     print(f"✅ Ragas scores saved to: {ragas_result}")
+    # except Exception as e:
+    #     print(f"⚠️ Ragas scoring failed (skipping): {e}")
 
     # ROUGE-N (độ giống nhau dựa trên n-gram)
     file_path = rouge_excel(file_path, n=2)

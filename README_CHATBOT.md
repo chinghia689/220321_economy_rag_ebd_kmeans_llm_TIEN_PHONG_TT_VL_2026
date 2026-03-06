@@ -24,7 +24,7 @@ Một ứng dụng chatbot sử dụng **Retrieval-Augmented Generation (RAG)** 
     │                                                │
     │  ┌─ Retrieve (Energy Distance)               │
     │  │  - Load ChromaDB                          │
-    │  │  - Get Top-30 by Cosine Similarity        │
+    │  │  - Get Top-40 by Cosine Similarity        │
     │  │  - K-Means Clustering                     │
     │  │  - Find Best Cluster by Energy Distance   │
     │  │                                            │
